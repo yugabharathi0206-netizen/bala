@@ -1,0 +1,6 @@
+{
+  "name": "Dr. Balaji Homeo",
+  "description": "Patient consultation booking, appointments, health guide, and enhanced profile management for Dr. Balaji Homeo Care clinic.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

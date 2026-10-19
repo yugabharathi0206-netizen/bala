@@ -1,0 +1,13 @@
+<resources>
+    <string name="app_name">Dr. Balaji Homeo</string>
+    <string name="clinic_title">Dr. Balaji Homeo Care</string>
+    <string name="clinic_subtitle">Classical Homeopathy Clinic</string>
+    <string name="doctor_qualification">B.H.M.S., M.D. (Homeopathy)</string>
+    <string name="doctor_experience">15+ Years Clinical Practice</string>
+    <string name="doctor_designation">Chief Consultant &amp; Classical Prescriber</string>
+    <string name="nav_home">Home</string>
+    <string name="nav_book">Book</string>
+    <string name="nav_appointments">Appointments</string>
+    <string name="nav_remedies">Homeo Guide</string>
+    <string name="nav_profile">Profile</string>
+</resources>
