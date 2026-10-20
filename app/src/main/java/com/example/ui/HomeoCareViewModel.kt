@@ -77,6 +77,14 @@ class HomeoCareViewModel(
     init {
         // Initial cloud sync
         syncWithCloud()
+        viewModelScope.launch {
+            while (true) {
+                kotlinx.coroutines.delay(4000)
+                try {
+                    repository.refreshCloudData()
+                } catch (_: Exception) {}
+            }
+        }
     }
 
     fun navigateTo(screen: AppScreen) {

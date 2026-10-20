@@ -1,0 +1,491 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<!-- This site is hosted on Netlify. Anyone can build and deploy a site
+     like this one for free: https://netlify.new/?utm_campaign=loops&utm_source=ai-legible&utm_medium=owned&utm_content=comment&utm_id=9a2d637f-ac52-4de1-82bf-c2cbc7756e08
+     Netlify hosting facts for this site: static/SSR served via Netlify Edge. -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#0d9488">
+  <title>Dr. Balaji Homeo Care | Patient Booking Portal</title>
+  <meta name="description" content="Online Patient Booking and Consultation Portal for Dr. Balaji Homeo Care Classical Homeopathy Clinic.">
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= SITE HEADER ================= -->
+  <header class="site-header">
+    <div class="header-inner">
+      <a href="#home" class="brand-wrapper">
+        <div class="brand-icon">🌿</div>
+        <div class="brand-info">
+          <h1>Dr. Balaji Homeo Care</h1>
+          <p>Classical Homeopathy Clinic</p>
+        </div>
+      </a>
+
+      <!-- Guest Navigation -->
+      <nav id="guestNavLinks" class="nav-links">
+        <a href="#home" class="nav-link active">Home</a>
+        <a href="#login" class="nav-link">Patient Login</a>
+        <a href="#signup" class="nav-link nav-btn">Create Account</a>
+      </nav>
+
+      <!-- Authenticated Patient Navigation -->
+      <nav id="userNavLinks" class="nav-links" style="display: none;">
+        <a href="#dashboard" class="nav-link">Dashboard</a>
+        <a href="#book" class="nav-link nav-btn">Book Appointment</a>
+        <a href="#appointments" class="nav-link">My Appointments</a>
+        <a href="#profile" class="nav-link">Profile</a>
+        <div class="user-badge">
+          <span class="avatar-dot"></span>
+          <span id="navUserName">Patient</span>
+        </div>
+        <a href="#logout" class="nav-link btn-logout-action" style="color: #ef4444;">Logout</a>
+      </nav>
+    </div>
+  </header>
+
+  <!-- ================= MAIN CONTENT VIEWS ================= -->
+  <main class="main-content">
+
+    <!-- VIEW 1: PUBLIC CLINIC HOME -->
+    <section id="viewHome" class="page-view active">
+      <!-- Hero Banner -->
+      <div class="hero-card">
+        <div class="hero-body">
+          <div class="hero-pill">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            Permanent & Gentle Healing
+          </div>
+          <h2 class="hero-title">Classical Homeopathy by <span>Dr. Balaji</span></h2>
+          <p class="hero-subtitle">
+            Experience constitutional holistic treatment for chronic and acute ailments. Precision case taking, individualized natural remedies, and zero side-effects.
+          </p>
+
+          <div class="hero-actions">
+            <button class="btn btn-primary" onclick="window.navigateTo(window.currentPatient ? '#book' : '#login')">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+              Book Appointment
+            </button>
+            <button class="btn btn-secondary" onclick="window.navigateTo('#login')">
+              Patient Portal Login
+            </button>
+          </div>
+
+          <div class="hero-features">
+            <div class="feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>15+ Years Clinical Practice</span>
+            </div>
+            <div class="feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Pure Potentised Remedies</span>
+            </div>
+            <div class="feature-item">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>In-Clinic & Video Consults</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-doctor-aside">
+          <div class="doctor-photo-wrap">
+            <img src="doctor_portrait.jpg" alt="Dr. Balaji - Classical Homeopath" onerror="this.src='https://images.unsplash.com/photo-1622253692010-333f2da6031d?w=400&q=80'">
+          </div>
+          <h3 class="doctor-aside-name">Dr. Balaji</h3>
+          <p class="doctor-aside-qual">B.H.M.S., M.D. (Homeopathy)</p>
+          <p class="doctor-aside-exp">Chief Consultant & Classical Prescriber</p>
+        </div>
+      </div>
+
+      <!-- Clinic Information Strip -->
+      <div class="clinic-info-strip">
+        <div class="info-box">
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="info-text">
+            <h4>Consultation Timings</h4>
+            <p>Morning: 09:30 AM – 01:00 PM<br>Evening: 04:30 PM – 08:00 PM<br>(Monday to Saturday)</p>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>
+          </div>
+          <div class="info-text">
+            <h4>Clinic Location</h4>
+            <p>Dr. Balaji Homeo Care<br>Main Road, Classical Healthcare Complex<br>Reception: Available on Appointment</p>
+          </div>
+        </div>
+
+        <div class="info-box">
+          <div class="info-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path></svg>
+          </div>
+          <div class="info-text">
+            <h4>Contact & WhatsApp</h4>
+            <p>Direct patient queries, booking confirmations, and dispensary updates are managed via our dedicated portal.</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Clinical Specializations -->
+      <div class="section-heading">
+        <h2>Specialized Homeopathy Care</h2>
+        <p>Comprehensive constitutional healing tailored to your individual symptom totality.</p>
+      </div>
+
+      <div class="specialty-grid">
+        <div class="specialty-card">
+          <div class="specialty-icon">🌸</div>
+          <h3>Skin, Psoriasis & Allergies</h3>
+          <p>Holistic resolution of chronic eczema, urticaria, fungal infections, acne, and stubborn vitiligo from root cause.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon">🫁</div>
+          <h3>Respiratory & Chronic Asthma</h3>
+          <p>Long-term relief from wheezing, allergic rhinitis, recurrent bronchitis, sinusitis, and dust sensitivity without inhaler dependency.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon">🧠</div>
+          <h3>Migraine & Stress Disorders</h3>
+          <p>Gentle healing for chronic vascular headaches, tension migraines, insomnia, anxiety neurosis, and psychosomatic tension.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon">🥗</div>
+          <h3>Digestive Health & IBS</h3>
+          <p>Constitutional remedies for GERD, acid reflux, chronic gastritis, irritable bowel syndrome, and metabolic sluggishness.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon">👶</div>
+          <h3>Pediatric Immunity & Growth</h3>
+          <p>Natural gentle care for recurrent tonsillitis, low childhood immunity, adenoids, poor appetite, and behavioral restlessness.</p>
+        </div>
+
+        <div class="specialty-card">
+          <div class="specialty-icon">🌿</div>
+          <h3>Hormonal & Thyroid Balance</h3>
+          <p>Targeted constitutional therapy for PCOD/PCOS, thyroid dysregulation, hair fall, and peri-menopausal hot flashes.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 2: PATIENT LOGIN -->
+    <section id="viewLogin" class="page-view">
+      <div class="auth-wrapper">
+        <div class="auth-header">
+          <div class="auth-icon-circle">🔐</div>
+          <h2>Patient Login</h2>
+          <p>Sign in to your patient account to book or view your appointments</p>
+        </div>
+
+        <div id="loginAlert" class="auth-alert"></div>
+
+        <form id="patientLoginForm">
+          <div class="form-group">
+            <label class="form-label" for="loginIdentifier">Mobile Number or Email</label>
+            <input type="text" id="loginIdentifier" class="form-input" placeholder="e.g. 9876543210 or name@email.com" required autocomplete="username">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="loginPassword">Password</label>
+            <input type="password" id="loginPassword" class="form-input" placeholder="Enter your password" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Sign In to Patient Portal</button>
+        </form>
+
+        <div class="auth-footer">
+          New patient at Dr. Balaji Homeo Care?
+          <br>
+          <a href="#signup">Create your Patient Account</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 3: PATIENT SIGN UP -->
+    <section id="viewSignup" class="page-view">
+      <div class="auth-wrapper">
+        <div class="auth-header">
+          <div class="auth-icon-circle">📝</div>
+          <h2>Create Patient Account</h2>
+          <p>Register once to book consultations and track your treatment history</p>
+        </div>
+
+        <div id="signupAlert" class="auth-alert"></div>
+
+        <form id="patientSignupForm">
+          <div class="form-group">
+            <label class="form-label" for="signupFullName">Full Name *</label>
+            <input type="text" id="signupFullName" class="form-input" placeholder="e.g. Arun Kumar" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signupMobile">Mobile Number (10 digits) *</label>
+            <input type="tel" id="signupMobile" class="form-input" placeholder="e.g. 9876543210" pattern="[0-9]{10}" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signupEmail">Email Address (Optional)</label>
+            <input type="email" id="signupEmail" class="form-input" placeholder="e.g. arun@example.com">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signupPassword">Password *</label>
+            <input type="password" id="signupPassword" class="form-input" placeholder="At least 4 characters" minlength="4" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="signupConfirmPassword">Confirm Password *</label>
+            <input type="password" id="signupConfirmPassword" class="form-input" placeholder="Re-enter password" minlength="4" required>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Create Patient Account</button>
+        </form>
+
+        <div class="auth-footer">
+          Already registered?
+          <br>
+          <a href="#login">Sign in to your account</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 4: PATIENT DASHBOARD -->
+    <section id="viewDashboard" class="page-view">
+      <!-- Greeting Header -->
+      <div class="dashboard-header">
+        <div class="patient-greeting">
+          <h2>Welcome, <span id="dashPatientName">Patient</span> 👋</h2>
+          <p>Mobile: <strong id="dashPatientPhone">...</strong> • Dr. Balaji Homeo Care Patient Portal</p>
+        </div>
+        <div class="dash-actions">
+          <button class="btn btn-primary" onclick="window.navigateTo('#book')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            Book New Appointment
+          </button>
+          <button class="btn btn-secondary" onclick="window.navigateTo('#appointments')">
+            My Appointments
+          </button>
+          <button class="btn btn-secondary" onclick="window.navigateTo('#profile')">
+            My Profile
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Stats -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon primary">📅</div>
+          <div class="stat-content">
+            <p>Total Bookings</p>
+            <h3 id="statTotalVisits">0</h3>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon green">✅</div>
+          <div class="stat-content">
+            <p>Confirmed</p>
+            <h3 id="statConfirmedCount">0</h3>
+          </div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon blue">⏳</div>
+          <div class="stat-content">
+            <p>Under Doctor Review</p>
+            <h3 id="statPendingCount">0</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Upcoming / Active Appointment Highlight -->
+      <div class="section-heading">
+        <h2>Upcoming Appointment Status</h2>
+        <p>Real-time confirmation status synchronized directly with Dr. Balaji's clinic app.</p>
+      </div>
+
+      <div class="upcoming-highlight-card" id="upcomingAppointmentContainer">
+        <!-- Dynamically injected via renderDashboard() -->
+      </div>
+    </section>
+
+    <!-- VIEW 5: BOOK APPOINTMENT -->
+    <section id="viewBook" class="page-view">
+      <div class="booking-container">
+        <div class="booking-header">
+          <h2>Book Consultation with Dr. Balaji</h2>
+          <p>Select your preferred date, available time slot, and consultation mode</p>
+        </div>
+
+        <form id="appointmentBookingForm">
+          <!-- Consultation Type Selector -->
+          <label class="form-label">Consultation Mode *</label>
+          <div class="consultation-type-selector">
+            <div class="consultation-type-card selected" data-type="IN_CLINIC">
+              <div class="radio-indicator"></div>
+              <div class="consultation-type-text">
+                <h4>🏥 Offline Consultation</h4>
+                <p>Direct in-person clinic visit</p>
+              </div>
+            </div>
+
+            <div class="consultation-type-card" data-type="ONLINE">
+              <div class="radio-indicator"></div>
+              <div class="consultation-type-text">
+                <h4>🌐 Online Consultation</h4>
+                <p>Live video consultation</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Pre-filled Patient Details -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+            <div class="form-group">
+              <label class="form-label" for="bookPatientName">Patient Name</label>
+              <input type="text" id="bookPatientName" class="form-input" readonly style="background: var(--surface-alt);">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="bookPatientPhone">Mobile Number</label>
+              <input type="text" id="bookPatientPhone" class="form-input" readonly style="background: var(--surface-alt);">
+            </div>
+          </div>
+
+          <!-- Symptoms / Reason -->
+          <div class="form-group">
+            <label class="form-label" for="bookSymptoms">Symptoms / Health Concern for Consultation *</label>
+            <textarea id="bookSymptoms" class="form-input" placeholder="Briefly describe your symptoms, duration, or reason for appointment (e.g. Migraine for 3 months, Allergic wheezing, Skin rash...)" required></textarea>
+          </div>
+
+          <!-- Select Date -->
+          <div class="form-group">
+            <label class="form-label" for="bookDateInput">Select Date *</label>
+            <input type="date" id="bookDateInput" class="form-input" required>
+            
+            <div class="date-chips">
+              <button type="button" class="date-chip selected" data-days="0">Today</button>
+              <button type="button" class="date-chip" data-days="1">Tomorrow</button>
+              <button type="button" class="date-chip" data-days="2">+2 Days</button>
+              <button type="button" class="date-chip" data-days="3">+3 Days</button>
+            </div>
+          </div>
+
+          <!-- Select Available Time Slot -->
+          <div class="form-group">
+            <label class="form-label">Select Available Time Slot *</label>
+            <div class="slots-grid-wrapper">
+              <div class="slots-grid" id="slotsGrid">
+                <!-- Dynamically rendered based on date availability -->
+              </div>
+            </div>
+          </div>
+
+          <div style="margin-top: 24px;">
+            <button type="submit" class="btn btn-primary btn-block">Confirm Appointment</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- VIEW 6: APPOINTMENT HISTORY -->
+    <section id="viewAppointments" class="page-view">
+      <div class="history-card">
+        <div class="history-card-header">
+          <div>
+            <h3>Your Appointment History</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem;">All your recorded bookings with Dr. Balaji Homeo Care</p>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="window.navigateTo('#book')">Book New Appointment</button>
+        </div>
+
+        <div id="appointmentHistoryList" class="appointment-items-list">
+          <!-- Dynamically injected via renderAppointmentsHistory() -->
+        </div>
+      </div>
+    </section>
+
+    <!-- VIEW 7: PATIENT PROFILE -->
+    <section id="viewProfile" class="page-view">
+      <div class="auth-wrapper" style="max-width: 520px;">
+        <div class="auth-header">
+          <div class="auth-icon-circle">👤</div>
+          <h2>My Profile</h2>
+          <p>Your registered details at Dr. Balaji Homeo Care</p>
+        </div>
+
+        <form id="patientProfileForm">
+          <div class="form-group">
+            <label class="form-label" for="profName">Full Name</label>
+            <input type="text" id="profName" class="form-input" required>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profMobile">Registered Mobile (Primary ID)</label>
+            <input type="text" id="profMobile" class="form-input" readonly style="background: var(--surface-alt);">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="profEmail">Email Address</label>
+            <input type="email" id="profEmail" class="form-input" placeholder="e.g. arun@example.com">
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-block">Save Profile Changes</button>
+        </form>
+
+        <div style="margin-top: 20px; text-align: center;">
+          <button class="btn btn-danger btn-sm btn-logout-action" style="width: 100%;">Logout of My Account</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= BOOKING SUCCESS MODAL ================= -->
+  <div id="bookingSuccessModal" class="modal-overlay">
+    <div class="modal-dialog">
+      <div class="modal-success-icon">✓</div>
+      <h3>Appointment Request Submitted</h3>
+      <p>
+        Your appointment has been registered and sent directly to Dr. Balaji's clinic app.
+      </p>
+
+      <div class="modal-token-box">
+        <p>Appointment Token ID</p>
+        <h2 id="modalAppointmentToken">HM-2026-XXXX</h2>
+        <span class="status-pill pending" style="margin-top: 8px;">⏳ Status: PENDING</span>
+      </div>
+
+      <p style="font-size: 0.85rem; color: var(--text-muted);">
+        Dr. Balaji will review your request in the clinic application. Your dashboard will automatically update once confirmed.
+      </p>
+
+      <button id="modalCloseBtn" class="btn btn-primary btn-block">Go to My Dashboard</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Site Footer -->
+  <footer class="site-footer">
+    <p>© 2026 Dr. Balaji Homeo Care. All rights reserved. • Classical Constitutional Homeopathy</p>
+  </footer>
+
+  <!-- Firebase v10 Compat SDK -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore-compat.js"></script>
+  
+  <!-- Clinic Backend Config & App Script -->
+  <script src="firebase-config.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
+<script async src="/.netlify/scripts/hud?variant=public" data-nf-variant="public" data-netlify-site-id="9a2d637f-ac52-4de1-82bf-c2cbc7756e08" data-app-host="app.netlify.com" data-account-tier="free"></script>

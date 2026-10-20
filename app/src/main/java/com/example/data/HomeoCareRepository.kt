@@ -96,14 +96,14 @@ class HomeoCareRepository(
     suspend fun refreshCloudData() {
         val cloudAppts = firestoreService.fetchAppointments()
         if (cloudAppts.isNotEmpty()) {
-            val localIds = _appointments.value.map { it.id }.toSet()
-            val merged = _appointments.value.toMutableList()
+            val map = _appointments.value.associateBy { it.id }.toMutableMap()
             for (cloudItem in cloudAppts) {
-                if (!localIds.contains(cloudItem.id)) {
-                    merged.add(0, cloudItem)
+                val existing = map[cloudItem.id]
+                if (existing == null || cloudItem.updatedAt >= existing.updatedAt) {
+                    map[cloudItem.id] = cloudItem
                 }
             }
-            _appointments.value = merged.sortedByDescending { it.createdAt }
+            _appointments.value = map.values.sortedByDescending { it.createdAt }
         }
     }
 

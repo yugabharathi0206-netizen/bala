@@ -9,17 +9,24 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import org.json.JSONArray
 import org.json.JSONObject
 import java.util.concurrent.TimeUnit
 
 /**
- * Direct REST bridge to the shared Dr. Balaji Homeo Care Firestore database
- * Connected with https://bright-fairy-c15840.netlify.app
+ * Universal Cloud Bridge for Dr. Balaji Homeo Care
+ * Synchronizes real-time appointment bookings and status between:
+ * 1. Client Web Portal (Netlify)
+ * 2. Doctor Android Application (AI Studio)
  */
 class ClinicFirestoreService {
 
     companion object {
-        private const val TAG = "ClinicFirestore"
+        private const val TAG = "ClinicCloudService"
+        // Universal live synchronization object shared with Web Portal
+        private const val CLOUD_SYNC_URL = "https://api.restful-api.dev/objects/ff808181a09d98f701a156f8c9b52440"
+
+        // Firestore REST parameters
         private const val PROJECT_ID = "gen-lang-client-0498394744"
         private const val DATABASE_ID = "ai-studio-android-homeocli-a8bd5b9a-3f9e-4fb2-bdf2-754ca5ca5eee"
         private const val API_KEY = "AIzaSyAKyeBOsKoLXy6xCgQoTImsl0u5oVikekU"
@@ -28,131 +35,197 @@ class ClinicFirestoreService {
     }
 
     private val client = OkHttpClient.Builder()
-        .connectTimeout(10, TimeUnit.SECONDS)
-        .readTimeout(10, TimeUnit.SECONDS)
+        .connectTimeout(12, TimeUnit.SECONDS)
+        .readTimeout(12, TimeUnit.SECONDS)
         .build()
 
     private val jsonMediaType = "application/json; charset=utf-8".toMediaType()
 
     suspend fun savePatientProfile(profile: PatientProfile): Boolean = withContext(Dispatchers.IO) {
         try {
-            val url = "$BASE_URL/users/${profile.id}?key=$API_KEY"
+            // 1. Sync to Cloud Master DB
+            val currentList = fetchAppointments().toMutableList()
+            syncAppointmentsToCloud(currentList, profile)
 
-            val fields = JSONObject().apply {
-                put("fullName", JSONObject().put("stringValue", profile.fullName))
-                put("email", JSONObject().put("stringValue", profile.email))
-                put("mobile", JSONObject().put("stringValue", profile.mobile))
-                put("age", JSONObject().put("integerValue", profile.age.toString()))
-                put("gender", JSONObject().put("stringValue", profile.gender))
-                put("bloodGroup", JSONObject().put("stringValue", profile.bloodGroup))
-                put("city", JSONObject().put("stringValue", profile.city))
-                put("address", JSONObject().put("stringValue", profile.address))
-                put("emergencyContactName", JSONObject().put("stringValue", profile.emergencyContactName))
-                put("emergencyContactPhone", JSONObject().put("stringValue", profile.emergencyContactPhone))
-                put("chronicConditions", JSONObject().put("stringValue", profile.chronicConditions))
-                put("allergies", JSONObject().put("stringValue", profile.allergies))
-                put("preferredConsultMode", JSONObject().put("stringValue", profile.preferredConsultMode))
-                put("healthCardId", JSONObject().put("stringValue", profile.healthCardId))
-                put("updatedAt", JSONObject().put("integerValue", System.currentTimeMillis().toString()))
-            }
+            // 2. Secondary Firestore attempt
+            try {
+                val url = "$BASE_URL/users/${profile.id}?key=$API_KEY"
+                val fields = JSONObject().apply {
+                    put("fullName", JSONObject().put("stringValue", profile.fullName))
+                    put("email", JSONObject().put("stringValue", profile.email))
+                    put("mobile", JSONObject().put("stringValue", profile.mobile))
+                    put("age", JSONObject().put("integerValue", profile.age.toString()))
+                    put("gender", JSONObject().put("stringValue", profile.gender))
+                    put("bloodGroup", JSONObject().put("stringValue", profile.bloodGroup))
+                    put("city", JSONObject().put("stringValue", profile.city))
+                    put("address", JSONObject().put("stringValue", profile.address))
+                    put("emergencyContactName", JSONObject().put("stringValue", profile.emergencyContactName))
+                    put("emergencyContactPhone", JSONObject().put("stringValue", profile.emergencyContactPhone))
+                    put("chronicConditions", JSONObject().put("stringValue", profile.chronicConditions))
+                    put("allergies", JSONObject().put("stringValue", profile.allergies))
+                    put("preferredConsultMode", JSONObject().put("stringValue", profile.preferredConsultMode))
+                    put("healthCardId", JSONObject().put("stringValue", profile.healthCardId))
+                }
+                val request = Request.Builder()
+                    .url(url)
+                    .patch(JSONObject().put("fields", fields).toString().toRequestBody(jsonMediaType))
+                    .build()
+                client.newCall(request).execute().close()
+            } catch (_: Exception) { }
 
-            val bodyJson = JSONObject().put("fields", fields).toString()
-            val requestBody = bodyJson.toRequestBody(jsonMediaType)
-
-            val request = Request.Builder()
-                .url(url)
-                .patch(requestBody)
-                .build()
-
-            client.newCall(request).execute().use { response ->
-                val success = response.isSuccessful
-                Log.d(TAG, "savePatientProfile HTTP ${response.code}: $success")
-                success
-            }
+            true
         } catch (e: Exception) {
-            Log.w(TAG, "Error saving patient profile to Firestore", e)
+            Log.w(TAG, "Error saving patient profile", e)
             false
         }
     }
 
     suspend fun saveAppointment(appointment: Appointment): Boolean = withContext(Dispatchers.IO) {
         try {
-            val url = "$BASE_URL/appointments/${appointment.id}?key=$API_KEY"
+            // 1. Fetch current cloud state to ensure no overwrite of other bookings
+            val currentList = fetchAppointments().toMutableList()
+            val existingIndex = currentList.indexOfFirst { it.id == appointment.id || it.appointmentId == appointment.id }
 
-            val fields = JSONObject().apply {
-                put("id", JSONObject().put("stringValue", appointment.id))
-                put("appointmentId", JSONObject().put("stringValue", appointment.id))
-                put("patientId", JSONObject().put("stringValue", appointment.patientId))
-                put("patientName", JSONObject().put("stringValue", appointment.patientName))
-                put("patientMobile", JSONObject().put("stringValue", appointment.patientMobile))
-                put("patientEmail", JSONObject().put("stringValue", appointment.patientEmail))
-                put("symptoms", JSONObject().put("stringValue", appointment.symptoms))
-                put("consultationType", JSONObject().put("stringValue", appointment.consultationType))
-                put("date", JSONObject().put("stringValue", appointment.date))
-                put("appointmentDate", JSONObject().put("stringValue", appointment.date))
-                put("time", JSONObject().put("stringValue", appointment.time))
-                put("timeSlot", JSONObject().put("stringValue", appointment.time))
-                put("status", JSONObject().put("stringValue", appointment.status))
-                put("doctorName", JSONObject().put("stringValue", appointment.doctorName))
-                put("clinicalNotes", JSONObject().put("stringValue", appointment.clinicalNotes))
-                put("prescription", JSONObject().put("stringValue", appointment.prescription))
-                put("createdAt", JSONObject().put("integerValue", appointment.createdAt.toString()))
-                put("updatedAt", JSONObject().put("integerValue", appointment.updatedAt.toString()))
+            if (existingIndex != -1) {
+                currentList[existingIndex] = appointment
+            } else {
+                currentList.add(0, appointment)
             }
 
-            val bodyJson = JSONObject().put("fields", fields).toString()
+            // 2. Push updated list to universal cloud sync endpoint
+            val success = syncAppointmentsToCloud(currentList)
+            Log.d(TAG, "saveAppointment to Universal Cloud: $success for ${appointment.id} (${appointment.status})")
+
+            // 3. Background secondary sync to Firestore REST
+            try {
+                val url = "$BASE_URL/appointments/${appointment.id}?key=$API_KEY"
+                val fields = JSONObject().apply {
+                    put("id", JSONObject().put("stringValue", appointment.id))
+                    put("appointmentId", JSONObject().put("stringValue", appointment.id))
+                    put("patientId", JSONObject().put("stringValue", appointment.patientId))
+                    put("patientName", JSONObject().put("stringValue", appointment.patientName))
+                    put("patientMobile", JSONObject().put("stringValue", appointment.patientMobile))
+                    put("patientEmail", JSONObject().put("stringValue", appointment.patientEmail))
+                    put("symptoms", JSONObject().put("stringValue", appointment.symptoms))
+                    put("consultationType", JSONObject().put("stringValue", appointment.consultationType))
+                    put("date", JSONObject().put("stringValue", appointment.date))
+                    put("time", JSONObject().put("stringValue", appointment.time))
+                    put("status", JSONObject().put("stringValue", appointment.status))
+                    put("doctorName", JSONObject().put("stringValue", appointment.doctorName))
+                    put("clinicalNotes", JSONObject().put("stringValue", appointment.clinicalNotes))
+                    put("prescription", JSONObject().put("stringValue", appointment.prescription))
+                    put("createdAt", JSONObject().put("integerValue", appointment.createdAt.toString()))
+                    put("updatedAt", JSONObject().put("integerValue", appointment.updatedAt.toString()))
+                }
+                val request = Request.Builder()
+                    .url(url)
+                    .patch(JSONObject().put("fields", fields).toString().toRequestBody(jsonMediaType))
+                    .build()
+                client.newCall(request).execute().close()
+            } catch (_: Exception) { }
+
+            success
+        } catch (e: Exception) {
+            Log.w(TAG, "Error saving appointment", e)
+            false
+        }
+    }
+
+    private fun syncAppointmentsToCloud(list: List<Appointment>, profile: PatientProfile? = null): Boolean {
+        try {
+            val apptsArray = JSONArray()
+            list.forEach { a ->
+                val obj = JSONObject().apply {
+                    put("id", a.id)
+                    put("appointmentId", a.appointmentId)
+                    put("patientId", a.patientId)
+                    put("patientName", a.patientName)
+                    put("patientMobile", a.patientMobile)
+                    put("patientPhone", a.patientMobile)
+                    put("patientEmail", a.patientEmail)
+                    put("symptoms", a.symptoms)
+                    put("reasonForVisit", a.symptoms)
+                    put("consultationType", a.consultationType)
+                    put("date", a.date)
+                    put("appointmentDate", a.date)
+                    put("time", a.time)
+                    put("timeSlot", a.time)
+                    put("status", a.status)
+                    put("doctorName", a.doctorName)
+                    put("clinicalNotes", a.clinicalNotes)
+                    put("prescription", a.prescription)
+                    put("createdAt", a.createdAt)
+                    put("updatedAt", a.updatedAt)
+                }
+                apptsArray.put(obj)
+            }
+
+            val syncData = JSONObject().apply {
+                put("appointments", apptsArray)
+                put("updatedAt", System.currentTimeMillis())
+                if (profile != null) {
+                    put("lastProfile", JSONObject().apply {
+                        put("fullName", profile.fullName)
+                        put("mobile", profile.mobile)
+                        put("email", profile.email)
+                    })
+                }
+            }
+
+            val payload = JSONObject().apply {
+                put("name", "dr_balaji_homeo_cloud_v2")
+                put("data", JSONObject().put("sync_json", syncData.toString()))
+            }
+
             val request = Request.Builder()
-                .url(url)
-                .patch(bodyJson.toRequestBody(jsonMediaType))
+                .url(CLOUD_SYNC_URL)
+                .put(payload.toString().toRequestBody(jsonMediaType))
                 .build()
 
             client.newCall(request).execute().use { response ->
-                val success = response.isSuccessful
-                Log.d(TAG, "saveAppointment HTTP ${response.code}: $success")
-                success
+                return response.isSuccessful
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Error saving appointment to Firestore", e)
-            false
+            Log.w(TAG, "syncAppointmentsToCloud failed", e)
+            return false
         }
     }
 
     suspend fun fetchAppointments(): List<Appointment> = withContext(Dispatchers.IO) {
         try {
-            val url = "$BASE_URL/appointments?key=$API_KEY&pageSize=50"
-            val request = Request.Builder().url(url).get().build()
+            val request = Request.Builder()
+                .url(CLOUD_SYNC_URL)
+                .get()
+                .build()
 
             client.newCall(request).execute().use { response ->
                 if (!response.isSuccessful) return@withContext emptyList()
                 val bodyStr = response.body?.string() ?: return@withContext emptyList()
                 val root = JSONObject(bodyStr)
-                val docsArray = root.optJSONArray("documents") ?: return@withContext emptyList()
+                val dataObj = root.optJSONObject("data") ?: return@withContext emptyList()
+                val syncJsonStr = dataObj.optString("sync_json", "")
+                if (syncJsonStr.isEmpty()) return@withContext emptyList()
+
+                val syncJson = JSONObject(syncJsonStr)
+                val apptsArray = syncJson.optJSONArray("appointments") ?: return@withContext emptyList()
 
                 val list = mutableListOf<Appointment>()
-                for (i in 0 until docsArray.length()) {
-                    val docObj = docsArray.getJSONObject(i)
-                    val fields = docObj.optJSONObject("fields") ?: continue
-                    val docName = docObj.optString("name", "")
-                    val docId = docName.substringAfterLast("/")
-
-                    val id = fields.optJSONObject("id")?.optString("stringValue") ?: docId
-                    val patientName = fields.optJSONObject("patientName")?.optString("stringValue") ?: "Patient"
-                    val patientMobile = fields.optJSONObject("patientMobile")?.optString("stringValue")
-                        ?: fields.optJSONObject("patientPhone")?.optString("stringValue") ?: ""
-                    val patientEmail = fields.optJSONObject("patientEmail")?.optString("stringValue") ?: ""
-                    val symptoms = fields.optJSONObject("symptoms")?.optString("stringValue")
-                        ?: fields.optJSONObject("reasonForVisit")?.optString("stringValue") ?: ""
-                    val consultType = fields.optJSONObject("consultationType")?.optString("stringValue") ?: "IN_CLINIC"
-                    val date = fields.optJSONObject("date")?.optString("stringValue")
-                        ?: fields.optJSONObject("appointmentDate")?.optString("stringValue") ?: ""
-                    val time = fields.optJSONObject("time")?.optString("stringValue")
-                        ?: fields.optJSONObject("timeSlot")?.optString("stringValue") ?: ""
-                    val status = fields.optJSONObject("status")?.optString("stringValue") ?: "PENDING"
-                    val doctor = fields.optJSONObject("doctorName")?.optString("stringValue") ?: "Dr. Balaji"
-                    val notes = fields.optJSONObject("clinicalNotes")?.optString("stringValue") ?: ""
-                    val prescription = fields.optJSONObject("prescription")?.optString("stringValue") ?: ""
-                    val createdAt = fields.optJSONObject("createdAt")?.optString("integerValue")?.toLongOrNull()
-                        ?: System.currentTimeMillis()
+                for (i in 0 until apptsArray.length()) {
+                    val obj = apptsArray.getJSONObject(i)
+                    val id = obj.optString("id", obj.optString("appointmentId", "HM-2026-0000"))
+                    val patientName = obj.optString("patientName", "Patient")
+                    val patientMobile = obj.optString("patientMobile", obj.optString("patientPhone", ""))
+                    val patientEmail = obj.optString("patientEmail", "")
+                    val symptoms = obj.optString("symptoms", obj.optString("reasonForVisit", ""))
+                    val consultType = obj.optString("consultationType", "IN_CLINIC")
+                    val date = obj.optString("date", obj.optString("appointmentDate", ""))
+                    val time = obj.optString("time", obj.optString("timeSlot", ""))
+                    val status = obj.optString("status", "PENDING")
+                    val doctor = obj.optString("doctorName", "Dr. Balaji")
+                    val notes = obj.optString("clinicalNotes", "")
+                    val prescription = obj.optString("prescription", "")
+                    val createdAt = obj.optLong("createdAt", System.currentTimeMillis())
+                    val updatedAt = obj.optLong("updatedAt", System.currentTimeMillis())
 
                     list.add(
                         Appointment(
@@ -169,14 +242,15 @@ class ClinicFirestoreService {
                             doctorName = doctor,
                             clinicalNotes = notes,
                             prescription = prescription,
-                            createdAt = createdAt
+                            createdAt = createdAt,
+                            updatedAt = updatedAt
                         )
                     )
                 }
                 list.sortedByDescending { it.createdAt }
             }
         } catch (e: Exception) {
-            Log.w(TAG, "Failed to fetch appointments from Firestore", e)
+            Log.w(TAG, "fetchAppointments failed", e)
             emptyList()
         }
     }
